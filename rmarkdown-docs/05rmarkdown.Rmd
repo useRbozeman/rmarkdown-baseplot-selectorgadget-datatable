@@ -1,0 +1,64 @@
+---
+title: More impressive pandoc-ing
+author: Michael Lerch
+output: rmarkdown::tufte_handout
+---
+
+```{r setup, echo = FALSE, results = "hide", warning = FALSE, message = FALSE}
+library(knitr)
+options(digits = 2)
+diamond <- read.csv("./data/diamond.csv")
+```
+
+Introduction
+============
+
+Objective 1
+-----------
+
+In this document, I will investigate diamond prices based on color and carat.
+
+Objective 2
+-----------
+
+I also hope to demonstrate different pandoc output types.
+
+Analysis
+========
+
+Average price
+-------------
+
+The overall average price is `r mean(diamond$Price)`
+
+Investigating a linear relationship
+-----------------------------------
+
+Is there linear relationship between price and carat after accounting for
+color?
+
+```{r data, fig.margin = TRUE}
+diamond <- read.csv("./data/diamond.csv")
+plot(diamond$Price ~ diamond$Carat, col = diamond$Color, pch = 19,
+     ylab = "Price", xlab = "Carat")
+```
+
+Log transform of price
+----------------------
+
+```{r plotlog, fig.margin=TRUE}
+plot(log(diamond$Price) ~ diamond$Carat, col = diamond$Color, pch = 19,
+     ylab = "log-Price", xlab = "Carat")
+```
+
+Final model
+-----------
+
+```{r model, results = "asis"}
+lm1 <- lm(log(Price) ~ Carat * Color, data = diamond)
+kable(data.frame(Value = coef(lm1)))
+```
+
+There is `r ifelse(summary(lm1)$coef[3, 4] < 0.05, print("significant"),
+print("little"))`  evidence that the effect for color F on price is is non-zero
+after accounting for carat.
